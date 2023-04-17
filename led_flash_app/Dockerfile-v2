@@ -1,0 +1,7 @@
+FROM arm64v8/alpine:latest
+
+WORKDIR /usr/src/app
+
+COPY ./led-app-v2.sh ./edge-app.sh
+
+ENTRYPOINT ["/usr/src/app/edge-app.sh"]

@@ -1,10 +1,31 @@
-# Helm Chart Proof of Concept Demo.
+# Helm Chart Proof of Concept Demos.
 
-There are 2 parts to the demo.
+This repository holds some sample containers and Helm charts.
 
+## LED Flasher
 
-The first is the containers with the applications. These are in led_flash_app - there are 2 versions of the container with different LED flashing behaviour.
+### LED Flasher Containers
+
+The container specification is in led_flash_app.
+
+There are 2 versions of the container with different LED flashing behaviour.
+
 There is a build.sh script to assist in building the containers and pushing them into an account specific container registry.
 
-Then there is Helm charts. These are in helm
+### LED Flasher Helm Charts
+
+The LED flasher Helm Charts are in helm/rpi-poc-demo
+
+
+## PARSEC
+
+### PARSEC Container
+
+The container specification is in parsec_app.
+
+This container must be built on the device being used - for example a RPi.
+There is a build.sh script to assist in building the containers and pushing them into an account specific container registry.
+
+## PARSEC Helm Charts
+
 

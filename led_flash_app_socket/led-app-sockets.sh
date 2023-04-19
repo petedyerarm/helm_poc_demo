@@ -1,3 +1,3 @@
 #!/bin/sh
 
-led_flash.py
+./led_flash.py

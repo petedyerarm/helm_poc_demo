@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ .Values.username }}-{{ .Values.nodename }}"
+spec:
+  automountServiceAccountToken: false
+  nodeName: {{ .Values.nodename }}
+  securityContext:
+    runAsUser: {{ .Values.userID }}
+    runAsGroup: {{ .Values.groupID }}
+  containers:
+  - name: parsec-poc-app
+    image: "containers.local:8080/{{ .Values.accountid }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+    volumeMounts:
+      - mountPath: /run
+        name: parsec-sock
+  restartPolicy: OnFailure
+  volumes:
+  - name: parsec-sock
+    hostPath:
+      path: /run

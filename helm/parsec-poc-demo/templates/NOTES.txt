@@ -1,0 +1,9 @@
+PARSEC proof of concept demo.
+
+Running on node:    {{ .Values.nodename }}
+Running in account: {{.Values.accountid }}
+Running container:  {{ .Values.image.name}}:{{ .Values.image.tag }}
+
+Running as user:    {{ .Values.username }}
+
+

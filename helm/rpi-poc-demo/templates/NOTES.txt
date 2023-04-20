@@ -8,6 +8,10 @@ Running container:  {{ .Values.image.name}}:{{ .Values.image.tag }}
    GREEN LED will flash every 1 second, RED every 2 seconds.
 {{- else if eq  .Values.image.tag "v2" }}
    GREEN LED will flash every 2 seconds, RED every 1 second.
+{{- else if eq  .Values.image.tag "green" }}
+   GREEN LED will flash every 1 second.
+{{- else if eq  .Values.image.tag "red" }}
+   RED LED will flash every 1 second.
 {{- else }}
    {{ .Values.image.tag }}  has unknown behavior
 {{- end }}

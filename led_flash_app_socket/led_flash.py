@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 
+import argparse
 import sys
 import time
 
 
-def red(on):
+def _red(on):
     with open("/work/led1/brightness", "w") as red:
         if on:
             print("RED: ON")
@@ -14,7 +15,7 @@ def red(on):
             red.write("0")
 
 
-def green(on):
+def _green(on):
     with open("/work/led0/brightness", "w") as green:
         if on:
             print("GRN: ON")
@@ -24,33 +25,78 @@ def green(on):
             green.write("0")
 
 
-def init_leds():
+def _init_leds():
     with open("/work/led1/trigger", "w") as red_trigger:
         red_trigger.write("gpio")
-    red(False)
+    _red(False)
     with open("/work/led0/trigger", "w") as green_trigger:
         green_trigger.write("gpio")
-    green(False)
+    _green(False)
 
 
 def main():
-    init_leds()
+    """Perform the main execution."""
+    # Parse command line
+    parser = argparse.ArgumentParser(description="Flash LEDs")
+    parser.add_argument(
+        "--green_on", type=int, help="Green LED on seconds", required=True
+    )
+    parser.add_argument(
+        "--green_off", type=int, help="Green LED off seconds", required=True
+    )
+    parser.add_argument(
+        "--red_on", type=int, help="Red LED on seconds", required=True
+    )
+    parser.add_argument(
+        "--red_off", type=int, help="Red LED off seconds", required=True
+    )
 
-    red(True)
-    green(False)
-    time.sleep(1)
+    options = parser.parse_args()
 
-    red(False)
-    green(True)
-    time.sleep(1)
+    print(options.green_on)
+    print(options.green_off)
+    print(options.red_on)
+    print(options.red_off)
 
-    red(True)
-    green(False)
-    time.sleep(1)
+    _init_leds()
 
-    red(False)
-    green(True)
-    time.sleep(1)
+    green_off = False
+    red_off = False
+    red_seconds = options.red_on
+    green_seconds = options.green_on
+
+    while True:
+        if green_off:
+            if green_seconds > 0:
+                _green(False)
+                green_seconds -= 1
+            if green_seconds == 0:
+                green_off = False
+                green_seconds = options.green_on
+        else:
+            if green_seconds > 0:
+                _green(True)
+                green_seconds -= 1
+            if green_seconds == 0:
+                green_off = True
+                green_seconds = options.green_off
+
+        if red_off:
+            if red_seconds > 0:
+                _red(False)
+                red_seconds -= 1
+            if red_seconds == 0:
+                red_off = False
+                red_seconds = options.red_on
+        else:
+            if red_seconds > 0:
+                _red(True)
+                red_seconds -= 1
+            if red_seconds == 0:
+                red_off = True
+                red_seconds = options.red_off
+
+        time.sleep(1)
 
 
 if __name__ == "__main__":

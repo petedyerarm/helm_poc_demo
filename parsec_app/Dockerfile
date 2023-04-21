@@ -18,11 +18,11 @@ WORKDIR /usr/src/app
 COPY ./parsec-test.sh .
 RUN chmod 755 ./parsec-test.sh
 
-COPY --from=builder /usr/local/cargo/bin/parsec-tool .
-RUN chmod 755 ./parsec-tool
+COPY --from=builder /usr/local/cargo/bin/parsec-tool /usr/local/bin/
+RUN chmod 755 /usr/local/bin/parsec-tool
 
 RUN apk update \
-    && apk add --no-cache libc-dev bash
+    && apk add --no-cache bash
 
 ENTRYPOINT ["/usr/src/app/parsec-test.sh"]
 

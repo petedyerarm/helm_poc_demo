@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 printf "Running as `id`\n\n"
+
 if /usr/src/app/parsec-tool ping | grep '1.0'; then 
     printf "Parsec service is reachable!\n\n"
 
@@ -13,8 +14,7 @@ if /usr/src/app/parsec-tool ping | grep '1.0'; then
         /usr/src/app/parsec-tool create-ecc-key --key-name `id -u`-key-$((1 + $RANDOM % 10))
         /usr/src/app/parsec-tool list-keys
     fi
+    /usr/src/app/parsec-tool export-public-key --key-name $(/usr/src/app/parsec-tool  list-keys | cut -d" " -f2)
 fi
-
-sleep 600
 
 

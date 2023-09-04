@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Parse command line
-args_list="account:"
 args_list="api_key:"
 args_list="${args_list},verbose"
 
@@ -22,9 +21,6 @@ while [ $# -gt 0 ]; do
         continue
     fi
     case $1 in
-    --account)
-        opt_prev=accountId
-        ;;
     --api_key)
         opt_prev=apiKey
         ;;
@@ -35,28 +31,38 @@ while [ $# -gt 0 ]; do
     shift 1
 done
 
-if [ -z "${accountId:-}" ]; then
-    echo "Account ID not specified"
-    exit 1
-fi
-
 if [ -z "${apiKey:-}" ]; then
     echo "API Key not specified"
     exit 1
 fi
 
+# Work out the accountId from the apiKey.
 
-docker login containers.us-east-1.mbedcloud.com -u KEY -p  "${apiKey}"
+if [ "$(curl -s -o /dev/null https://api.us-east-1.mbedcloud.com/v3/accounts/me -w "%{http_code}\n" -H "Authorization: Bearer ${apiKey}")" = 200 ]; then
+    accountId=$(curl -s https://api.us-east-1.mbedcloud.com/v3/accounts/me -H "Authorization: Bearer ${apiKey}" | jq ".id")
+    CONTAINER_REGISTRY_URL="containers.us-east-1.mbedcloud.com"
+elif [ "$(curl -s -o /dev/null https://lab-api.mbedcloudintegration.net/v3/accounts/me -w "%{http_code}\n" -H "Authorization: Bearer ${apiKey}")" = 200 ]; then
+    accountId=$(curl -s https://lab-api.mbedcloudintegration.net/v3/accounts/me -H "Authorization: Bearer ${apiKey}" | jq ".id")
+    CONTAINER_REGISTRY_URL="containers.mbedcloudintegration.net"
+elif [ "$(curl -s -o /dev/null https://api-os2.mbedcloudstaging.net/v3/accounts/me -w "%{http_code}\n" -H "Authorization: Bearer ${apiKey}")" = 200 ]; then
+    accountId=$(curl -s https://api-os2.mbedcloudstaging.net/v3/accounts/me -H "Authorization: Bearer ${apiKey}" | jq ".id")
+    CONTAINER_REGISTRY_URL="containers.mbedcloudstaging.net"
+else
+    echo "ERROR - API key doesn't belong to an account on PRODUCTION, STAGING or INTLAB"
+    exit 1
+fi
 
+echo "${apiKey}" | docker login "${CONTAINER_REGISTRY_URL}" -u KEY --password-stdin
 
-docker build -t containers.us-east-1.mbedcloud.com/"${accountId}"/led_poc_demo:red -f Dockerfile-red .
-docker push  containers.us-east-1.mbedcloud.com/"${accountId}"/led_poc_demo:red
+docker build -t "${CONTAINER_REGISTRY_URL}"/"${accountId}"/led_poc_demo:red -f Dockerfile-red .
+docker push  "${CONTAINER_REGISTRY_URL}"/"${accountId}"/led_poc_demo:red
 
-docker build -t containers.us-east-1.mbedcloud.com/"${accountId}"/led_poc_demo:green -f Dockerfile-green .
+docker build -t "${CONTAINER_REGISTRY_URL}"/"${accountId}"/led_poc_demo:green -f Dockerfile-green .
 docker push  containers.us-east-1.mbedcloud.com/"${accountId}"/led_poc_demo:green
 
+docker logout "${CONTAINER_REGISTRY_URL}"
 
-curl https://containers.us-east-1.mbedcloud.com/v2/"${accountId}"/led_poc_demo/tags/list -H "Authorization: Bearer ${apiKey}"
+curl https://"${CONTAINER_REGISTRY_URL}"/v2/"${accountId}"/led_poc_demo/tags/list -H "Authorization: Bearer ${apiKey}"
 
 
 
